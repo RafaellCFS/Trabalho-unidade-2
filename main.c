@@ -1,3 +1,4 @@
+#include <stdio.h> 
 #include <stdlib.h>
 #include <string.h>
 #include "raylib.h"
@@ -57,17 +58,38 @@ static void desenharBarras(const CombSort *c, Estado estado, double min, double 
     }
 }
 
-int main(int argc, char **argv) {
-    const char *arquivo = "dados/aleatorio_100.txt";
-    if (argc > 1) {
-        arquivo = argv[1];
+static int gerarArquivo(const char *nome, int n) {
+    FILE *f = fopen(nome, "w");
+    if (f == NULL) {
+        return 0;
+    }
+    srand(42);
+    fprintf(f, "%d\n", n);
+    for (int k = 0; k < n; k++) {
+        fprintf(f, "i %d\n", rand() % 100000);
+    }
+    fclose(f);
+    return 1;
+}
+
+int main(void) {
+    int n = 0;
+    printf("Quantidade de elementos (2 a 10000): ");
+    if (scanf("%d", &n) != 1 || n < 2 || n > 10000) {
+        printf("Valor invalido\n");
+        return 1;
+    }
+    const char *arquivo = "dados/entrada.txt";
+    if (!gerarArquivo(arquivo, n)) {
+        printf("Nao foi possivel criar %s. Crie a pasta dados.\n", arquivo);
+        return 1;
     }
     Elemento *v = NULL;
-    int n = 0;
     if (!carregarDados(arquivo, &v, &n)) {
         TraceLog(LOG_ERROR, "Nao foi possivel ler %s", arquivo);
         return 1;
     }
+
     Elemento *original = malloc(n * sizeof(Elemento));
     if (original == NULL) {
         free(v);
